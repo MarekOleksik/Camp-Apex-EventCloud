@@ -72,12 +72,18 @@ public with sharing class CampxSponsorTriggerHandler {
             if (hasToRecalculateEventsGrossRevenue(sponsor, oldRecordsMap)) {
                 eventIds.add(sponsor.CAMPX__Event__c);
             }
+            if (isEventCancelled(sponsor, oldRecordsMap)) {
+                eventIds.add(oldRecordsMap.get(sponsor.Id).CAMPX__Event__c);
+            }
         }
         if (eventIds.size() > 0) {
             calculateEventGrossRevenue(eventIds);
         }
     }
 
+    private static Boolean isEventCancelled(CAMPX__Sponsor__c sponsor, Map<Id,CAMPX__Sponsor__c> oldRecordsMap) {
+        return oldRecordsMap != null && sponsor.CAMPX__Event__c == null && oldRecordsMap.get(sponsor.Id).CAMPX__Event__c != null;
+    }
 
     private static Boolean hasToRecalculateEventsGrossRevenue(CAMPX__Sponsor__c sponsor, Map<Id,CAMPX__Sponsor__c> oldRecordsMap) {
         return ((oldRecordsMap == null 
@@ -88,6 +94,7 @@ public with sharing class CampxSponsorTriggerHandler {
                     && sponsor.CAMPX__Status__c  != oldRecordsMap.get(sponsor.Id).CAMPX__Status__c
                     && oldRecordsMap.get(sponsor.Id).CAMPX__Status__c == STATUS_ACCEPTED)
                 || (oldRecordsMap != null 
+                    && sponsor.CAMPX__Event__c != null
                     && sponsor.CAMPX__Event__c != oldRecordsMap.get(sponsor.Id).CAMPX__Event__c);
     }
 
